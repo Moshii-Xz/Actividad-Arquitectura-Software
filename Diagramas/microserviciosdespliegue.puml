@@ -1,50 +1,91 @@
 @startuml
-node "Cliente Web" {
-  artifact "Navegador" as navegador
+title Diagrama de Despliegue - Sistema de Artículos Académicos
+
+' ===== CLIENTE =====
+node "Cliente Web/Móvil" {
+  artifact "Navegador / App" as cliente
 }
 
-node "Microservicio Vehiculo" {
-  [VehiculoControl] 
-  [VehiculoServicio]
-  [Vehiculo]
-  [Moto]
-  [Auto]
-  [VehiculoRepositorio]
+' ===== API GATEWAY =====
+node "API Gateway" {
+  component "Gateway" as gateway
 }
 
-
-node "Microservicio Registro" {
-  [RegistroControl]
-  [RegistroServicio]
-  [Registro]
-  [RegistroRepositorio]
+' ===== MICROSERVICIO USUARIOS =====
+node "MS Usuarios" {
+  component "UsuarioControl"
+  component "UsuarioServicio"
+  component "UsuarioRepositorio"
+  database "DB_Usuarios" as dbUsuarios
 }
 
-node "Base de Datos Vehiculos" {
-  database "DB_Vehiculos" as dbVehiculo
+' ===== MICROSERVICIO ARTICULOS =====
+node "MS Artículos" {
+  component "ArticuloControl"
+  component "ArticuloServicio"
+  component "ArticuloRepositorio"
+  database "DB_Articulos" as dbArticulos
 }
 
-node "Base de Datos Registros" {
-  database "DB_Registros" as dbRegistro
+' ===== MICROSERVICIO EDITORIAL =====
+node "MS Editorial" {
+  component "RevisionControl"
+  component "RevisionServicio"
+  component "RevisionRepositorio"
+  database "DB_Editorial" as dbEditorial
 }
 
-' Conexiones externas
-navegador --> [VehiculoControl] : HTTP/REST
-navegador --> [RegistroControl] : HTTP/REST
+' ===== MICROSERVICIO PUBLICACION =====
+node "MS Publicación" {
+  component "PublicacionControl"
+  component "PublicacionServicio"
+  component "PublicacionRepositorio"
+  database "DB_Publicacion" as dbPublicacion
+}
 
-' Conexiones internas microservicio Vehiculo
-[VehiculoControl] --> [VehiculoServicio]
-[VehiculoServicio] --> [Vehiculo]
-[VehiculoServicio] --> [VehiculoRepositorio]
-[VehiculoRepositorio] --> dbVehiculo : JDBC/SQL
+' ===== MICROSERVICIO ADMIN =====
+node "MS Administración" {
+  component "AdminControl"
+  component "AdminServicio"
+  component "AdminRepositorio"
+  database "DB_Admin" as dbAdmin
+}
 
-' Conexiones internas microservicio Registro
-[RegistroControl] --> [RegistroServicio]
-[RegistroServicio] --> [Registro]
-[RegistroServicio] --> [RegistroRepositorio]
-[RegistroRepositorio] --> dbRegistro : JDBC/SQL
+' ===== CONEXIONES CLIENTE =====
+cliente --> gateway : HTTPS/REST
 
-' Comunicación entre microservicios
-[RegistroServicio] -left-> [VehiculoControl] : <<REST API>>
+' ===== GATEWAY A MICROSERVICIOS =====
+gateway --> UsuarioControl
+gateway --> ArticuloControl
+gateway --> RevisionControl
+gateway --> PublicacionControl
+gateway --> AdminControl
+
+' ===== CONEXIONES INTERNAS =====
+UsuarioControl --> UsuarioServicio
+UsuarioServicio --> UsuarioRepositorio
+UsuarioRepositorio --> dbUsuarios
+
+ArticuloControl --> ArticuloServicio
+ArticuloServicio --> ArticuloRepositorio
+ArticuloRepositorio --> dbArticulos
+
+RevisionControl --> RevisionServicio
+RevisionServicio --> RevisionRepositorio
+RevisionRepositorio --> dbEditorial
+
+PublicacionControl --> PublicacionServicio
+PublicacionServicio --> PublicacionRepositorio
+PublicacionRepositorio --> dbPublicacion
+
+AdminControl --> AdminServicio
+AdminServicio --> AdminRepositorio
+AdminRepositorio --> dbAdmin
+
+' ===== COMUNICACION ENTRE MICROSERVICIOS =====
+ArticuloServicio --> UsuarioServicio : validar usuario
+RevisionServicio --> ArticuloServicio : consultar articulo
+PublicacionServicio --> RevisionServicio : verificar aprobación
+AdminServicio --> UsuarioServicio : gestionar usuarios
 
 @enduml
