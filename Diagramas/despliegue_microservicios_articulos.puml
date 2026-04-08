@@ -1,0 +1,173 @@
+@startuml despliegue_microservicios_articulos
+title Diagrama de Despliegue de Microservicios - Sistema de Artículos Académicos
+
+node "Cliente Web" {
+  artifact "Navegador" as navegador
+}
+
+node "Cliente Móvil" {
+  artifact "App Móvil" as appMovil
+}
+
+node "API Gateway" {
+  [Gateway] as gateway
+}
+
+' =============================================
+' Microservicio Usuarios y Autenticación
+' =============================================
+node "Microservicio Usuarios y Autenticación" {
+  [UsuarioControl]
+  [AuthControl]
+  [UsuarioServicio]
+  [AuthServicio]
+  [TokenServicio]
+  [UsuarioRepositorio]
+}
+
+node "Base de Datos Usuarios" {
+  database "DB_Usuarios" as dbUsuarios
+}
+
+' =============================================
+' Microservicio Gestión de Artículos
+' =============================================
+node "Microservicio Gestión de Artículos" {
+  [ArticuloControl]
+  [ArticuloServicio]
+  [ArchivoServicio]
+  [ArticuloRepositorio]
+  [ArchivoRepositorio]
+}
+
+node "Base de Datos Artículos" {
+  database "DB_Articulos" as dbArticulos
+}
+
+node "Almacenamiento Archivos" {
+  artifact "FileServer\n(PDF / DOCX)" as fileServer
+}
+
+' =============================================
+' Microservicio Proceso Editorial
+' =============================================
+node "Microservicio Proceso Editorial" {
+  [RevisionControl]
+  [ComentarioControl]
+  [RevisionServicio]
+  [ComentarioServicio]
+  [NotificacionServicio]
+  [RevisionRepositorio]
+  [ComentarioRepositorio]
+}
+
+node "Base de Datos Revisiones" {
+  database "DB_Revisiones" as dbRevisiones
+}
+
+' =============================================
+' Microservicio Publicación
+' =============================================
+node "Microservicio Publicación" {
+  [PublicacionControl]
+  [PublicacionServicio]
+  [PublicacionRepositorio]
+}
+
+node "Base de Datos Publicaciones" {
+  database "DB_Publicaciones" as dbPublicaciones
+}
+
+' =============================================
+' Microservicio Administración
+' =============================================
+node "Microservicio Administración" {
+  [AdminControl]
+  [ReporteControl]
+  [AdminServicio]
+  [ReporteServicio]
+  [CategoriaServicio]
+  [AdminRepositorio]
+  [ReporteRepositorio]
+}
+
+node "Base de Datos Administración" {
+  database "DB_Admin" as dbAdmin
+}
+
+' =============================================
+' Conexiones clientes → gateway
+' =============================================
+navegador --> [Gateway] : HTTP/HTTPS
+appMovil  --> [Gateway] : HTTP/HTTPS
+
+' =============================================
+' Gateway → Controladores de cada microservicio
+' =============================================
+[Gateway] --> [UsuarioControl]    : REST
+[Gateway] --> [AuthControl]       : REST
+[Gateway] --> [ArticuloControl]   : REST
+[Gateway] --> [RevisionControl]   : REST
+[Gateway] --> [ComentarioControl] : REST
+[Gateway] --> [PublicacionControl] : REST
+[Gateway] --> [AdminControl]      : REST
+[Gateway] --> [ReporteControl]    : REST
+
+' =============================================
+' Conexiones internas MS Usuarios y Auth
+' =============================================
+[UsuarioControl] --> [UsuarioServicio]
+[AuthControl]    --> [AuthServicio]
+[AuthServicio]   --> [TokenServicio]
+[UsuarioServicio] --> [UsuarioRepositorio]
+[AuthServicio]   --> [UsuarioRepositorio]
+[UsuarioRepositorio] --> dbUsuarios : JDBC/SQL
+
+' =============================================
+' Conexiones internas MS Gestión de Artículos
+' =============================================
+[ArticuloControl]  --> [ArticuloServicio]
+[ArticuloServicio] --> [ArticuloRepositorio]
+[ArticuloServicio] --> [ArchivoServicio]
+[ArchivoServicio]  --> [ArchivoRepositorio]
+[ArticuloRepositorio] --> dbArticulos : JDBC/SQL
+[ArchivoServicio]  --> fileServer : HTTP
+
+' =============================================
+' Conexiones internas MS Proceso Editorial
+' =============================================
+[RevisionControl]   --> [RevisionServicio]
+[ComentarioControl] --> [ComentarioServicio]
+[RevisionServicio]  --> [RevisionRepositorio]
+[RevisionServicio]  --> [NotificacionServicio]
+[ComentarioServicio] --> [ComentarioRepositorio]
+[RevisionRepositorio]    --> dbRevisiones : JDBC/SQL
+[ComentarioRepositorio]  --> dbRevisiones : JDBC/SQL
+
+' =============================================
+' Conexiones internas MS Publicación
+' =============================================
+[PublicacionControl]  --> [PublicacionServicio]
+[PublicacionServicio] --> [PublicacionRepositorio]
+[PublicacionRepositorio] --> dbPublicaciones : JDBC/SQL
+
+' =============================================
+' Conexiones internas MS Administración
+' =============================================
+[AdminControl]   --> [AdminServicio]
+[ReporteControl] --> [ReporteServicio]
+[AdminServicio]  --> [CategoriaServicio]
+[AdminServicio]  --> [AdminRepositorio]
+[ReporteServicio] --> [ReporteRepositorio]
+[AdminRepositorio]   --> dbAdmin : JDBC/SQL
+[ReporteRepositorio] --> dbAdmin : JDBC/SQL
+
+' =============================================
+' Comunicación entre microservicios (REST)
+' =============================================
+[ArticuloServicio] -right-> [AuthControl]      : <<REST - valida token>>
+[RevisionServicio] -left->  [ArticuloControl]  : <<REST - consulta artículo>>
+[PublicacionServicio] -left-> [RevisionControl] : <<REST - verifica aprobación>>
+[AdminServicio]    -right-> [UsuarioControl]   : <<REST - gestiona usuarios>>
+
+@enduml
