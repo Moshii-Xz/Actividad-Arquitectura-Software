@@ -1,0 +1,30 @@
+@startuml arquitectura
+
+package "Presentacion" #DDDDDD {
+ class VehiculoControl 
+ class RegistroControl
+}
+
+package Servicio {
+  class VehiculoServicio
+  class RegistroServicio
+}
+
+
+package Modelo {
+  Vehiculo <|-- Moto
+  Vehiculo <|-- Auto
+  Registro "1" o-right-"1" Vehiculo
+}
+
+package Persistencia {
+ class VehiculoRepositorio
+ class RegistroRepositorio
+  
+}
+
+Presentacion  ..>  Servicio : <<uses>>
+Servicio  .down.>  Persistencia : <<uses>>
+Servicio  .right.>  Modelo : <<uses>>
+
+@enduml

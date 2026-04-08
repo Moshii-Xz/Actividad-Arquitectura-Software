@@ -1,0 +1,67 @@
+@startuml arquitectura microservicio
+title Diagrama de Paquetes - Microservicios Vehículo y Registro
+
+' =======================================================
+' Microservicio Vehículo
+' =======================================================
+package "Microservicio Vehículo" #DDDDDD {
+
+
+  package "Presentación" {
+    class VehiculoControl
+  }
+
+  package "Servicio" {
+    class VehiculoServicio
+  }
+
+  package "Modelo" {
+    class Vehiculo
+  }
+
+  package "Persistencia" {
+    class VehiculoRepositorio
+  }
+
+  ' Relaciones internas
+  VehiculoControl ..> VehiculoServicio : <<uses>>
+  VehiculoServicio ..> VehiculoRepositorio : <<uses>>
+  VehiculoServicio ..> Vehiculo : <<uses>>
+}
+
+' =======================================================
+' Microservicio Registro
+' =======================================================
+package "Microservicio Registro" #EEEEDD {
+
+  package "Presentación" {
+    class RegistroControl
+  }
+
+  package "Servicio" {
+    class RegistroServicio
+  }
+
+  package "Modelo" {
+    class Registro
+  }
+
+  package "Persistencia" {
+    class RegistroRepositorio
+  }
+
+  ' Relaciones internas
+  RegistroControl ..> RegistroServicio : <<uses>>
+  RegistroServicio ..> RegistroRepositorio : <<uses>>
+  RegistroServicio ..> Registro : <<uses>>
+}
+
+' =======================================================
+' Relación entre microservicios (a nivel de paquetes)
+' =======================================================
+
+' Mostramos que el microservicio Registro depende del de Vehículo por HTTP/REST
+'package "Microservicio Registro" ..> package "Microservicio Vehículo" : <<HTTP / API REST>>
+"Microservicio Registro" --> "Microservicio Vehículo" : <<HTTP / API REST>>
+
+@enduml

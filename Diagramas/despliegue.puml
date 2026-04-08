@@ -1,0 +1,24 @@
+@startuml despliegue
+node "Cliente Web" {
+  artifact "Navegador" as navegador
+}
+
+node "Servidor de Aplicaciones" {
+  [Presentacion] as presentacion
+  [Servicio] as servicio
+  [Modelo] as modelo
+  [Persistencia] as persistencia
+}
+
+node "Base de Datos" {
+  database "PostgreSQL" as db
+}
+
+' Conexiones
+navegador --> presentacion : HTTP/HTTPS
+presentacion --> servicio
+servicio --> modelo
+servicio --> persistencia
+persistencia --> db : JDBC/SQL
+
+@enduml

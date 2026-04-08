@@ -1,0 +1,53 @@
+@startuml microdespliegue
+node "Cliente Web" {
+  artifact "Navegador" as navegador
+}
+
+node "Microservicio Vehiculo" {
+  [VehiculoControl] 
+  [VehiculoServicio]
+  [Vehiculo]
+  [Moto]
+  [Auto]
+  [VehiculoRepositorio]
+}
+
+
+node "Microservicio Registro" {
+  [RegistroControl]
+  [RegistroServicio]
+  [Registro]
+  [RegistroRepositorio]
+}
+
+node "Base de Datos Vehiculos" {
+  database "DB_Vehiculos" as dbVehiculo
+}
+
+node "Base de Datos Registros" {
+  database "DB_Registros" as dbRegistro
+}
+
+' Conexiones externas
+navegador --> [VehiculoControl] : HTTP/REST
+navegador --> [RegistroControl] : HTTP/REST
+
+' Conexiones internas microservicio Vehiculo
+[VehiculoControl] --> [VehiculoServicio]
+[VehiculoServicio] --> [Vehiculo]
+[VehiculoServicio] --> [VehiculoRepositorio]
+[VehiculoRepositorio] --> dbVehiculo : JDBC/SQL
+
+' Conexiones internas microservicio Registro
+[RegistroControl] --> [RegistroServicio]
+[RegistroServicio] --> [Registro]
+[RegistroServicio] --> [RegistroRepositorio]
+[RegistroRepositorio] --> dbRegistro : JDBC/SQL
+
+' Comunicación entre microservicios
+[RegistroServicio] -left-> [VehiculoControl] : <<REST API>>
+
+
+
+
+@enduml
