@@ -1,4 +1,4 @@
-@startuml microdespliegue
+@startuml
 node "Cliente Web" {
   artifact "Navegador" as navegador
 }
@@ -46,8 +46,5 @@ navegador --> [RegistroControl] : HTTP/REST
 
 ' Comunicación entre microservicios
 [RegistroServicio] -left-> [VehiculoControl] : <<REST API>>
-
-
-
 
 @enduml
