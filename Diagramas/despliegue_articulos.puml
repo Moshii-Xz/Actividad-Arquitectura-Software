@@ -1,0 +1,101 @@
+@startuml despliegue_articulos
+title Diagrama de Despliegue - Sistema de Gestión de Artículos Académicos
+
+node "Cliente Web" {
+  artifact "Navegador" as navegador
+}
+
+node "Cliente Móvil" {
+  artifact "App Móvil" as appMovil
+}
+
+node "API Gateway" {
+  [Gateway / Balanceador] as gateway
+}
+
+node "Servidor MS Usuarios y Autenticación" {
+  [UsuarioControl]    as uc
+  [AuthControl]       as ac
+  [UsuarioServicio]   as us
+  [AuthServicio]      as as_
+  [UsuarioRepositorio] as ur
+}
+
+node "Servidor MS Gestión de Artículos" {
+  [ArticuloControl]    as arc
+  [ArticuloServicio]   as ars
+  [ArchivoServicio]    as afs
+  [ArticuloRepositorio] as arr
+}
+
+node "Servidor MS Proceso Editorial" {
+  [RevisionControl]    as rc
+  [RevisionServicio]   as rs
+  [ComentarioServicio] as cs
+  [RevisionRepositorio] as rr
+}
+
+node "Servidor MS Publicación" {
+  [PublicacionControl]    as pc
+  [PublicacionServicio]   as ps
+  [PublicacionRepositorio] as pr
+}
+
+node "Servidor MS Administración" {
+  [AdminControl]    as admc
+  [AdminServicio]   as adms
+  [ReporteServicio] as reps
+  [AdminRepositorio] as admr
+}
+
+node "DB Usuarios" {
+  database "PostgreSQL\ndb_usuarios" as dbUsuarios
+}
+
+node "DB Artículos" {
+  database "PostgreSQL\ndb_articulos" as dbArticulos
+}
+
+node "DB Revisiones" {
+  database "PostgreSQL\ndb_revisiones" as dbRevisiones
+}
+
+node "DB Publicaciones" {
+  database "PostgreSQL\ndb_publicaciones" as dbPublicaciones
+}
+
+node "DB Administración" {
+  database "PostgreSQL\ndb_admin" as dbAdmin
+}
+
+node "Almacenamiento de Archivos" {
+  artifact "Servidor de Archivos\n(PDF/DOCX)" as fileServer
+}
+
+' Clientes → Gateway
+navegador --> gateway : HTTP/HTTPS
+appMovil  --> gateway : HTTP/HTTPS
+
+' Gateway → Microservicios
+gateway --> uc  : REST
+gateway --> arc : REST
+gateway --> rc  : REST
+gateway --> pc  : REST
+gateway --> admc : REST
+
+' Conexiones internas y a BD
+ur  --> dbUsuarios    : JDBC/SQL
+arr --> dbArticulos   : JDBC/SQL
+rr  --> dbRevisiones  : JDBC/SQL
+pr  --> dbPublicaciones : JDBC/SQL
+admr --> dbAdmin      : JDBC/SQL
+
+afs --> fileServer : HTTP
+
+' Comunicación entre microservicios
+ars --> uc  : <<REST - valida token>>
+rs  --> arc : <<REST - consulta artículo>>
+ps  --> rs  : <<REST - verifica aprobación>>
+adms --> uc : <<REST - gestiona usuarios>>
+
+@enduml

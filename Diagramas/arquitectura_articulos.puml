@@ -1,0 +1,64 @@
+@startuml arquitectura_articulos
+title Diagrama de Arquitectura - Sistema de Gestión de Artículos Académicos
+
+package "Clientes" #DDDDDD {
+  class ClienteWeb
+  class ClienteMovil
+}
+
+package "API Gateway" #AADDAA {
+  class Gateway
+}
+
+package "MS Usuarios y Autenticación" #DDEEFF {
+  class UsuarioControl
+  class UsuarioServicio
+  class Usuario
+  class UsuarioRepositorio
+}
+
+package "MS Gestión de Artículos" #FFEEDD {
+  class ArticuloControl
+  class ArticuloServicio
+  class Articulo
+  class ArticuloRepositorio
+}
+
+package "MS Proceso Editorial" #EEFFDD {
+  class RevisionControl
+  class RevisionServicio
+  class Revision
+  class RevisionRepositorio
+}
+
+package "MS Publicación" #FFDDEE {
+  class PublicacionControl
+  class PublicacionServicio
+  class Publicacion
+  class PublicacionRepositorio
+}
+
+package "MS Administración" #DDDEFF {
+  class AdminControl
+  class AdminServicio
+  class Configuracion
+  class AdminRepositorio
+}
+
+' Clientes acceden por API Gateway
+Clientes ..> "API Gateway" : <<HTTP/HTTPS>>
+
+' Gateway enruta a cada microservicio
+"API Gateway" ..> "MS Usuarios y Autenticación" : <<REST>>
+"API Gateway" ..> "MS Gestión de Artículos"     : <<REST>>
+"API Gateway" ..> "MS Proceso Editorial"         : <<REST>>
+"API Gateway" ..> "MS Publicación"               : <<REST>>
+"API Gateway" ..> "MS Administración"            : <<REST>>
+
+' Dependencias entre microservicios
+"MS Gestión de Artículos" ..> "MS Usuarios y Autenticación" : <<valida token>>
+"MS Proceso Editorial"    ..> "MS Gestión de Artículos"     : <<consulta artículo>>
+"MS Publicación"          ..> "MS Proceso Editorial"        : <<verifica aprobación>>
+"MS Administración"       ..> "MS Usuarios y Autenticación" : <<gestiona usuarios>>
+
+@enduml

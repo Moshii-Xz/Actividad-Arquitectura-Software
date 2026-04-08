@@ -1,0 +1,178 @@
+@startuml paquetes_microservicios_articulos
+title Diagrama de Paquetes - Microservicios del Sistema de Artículos Académicos
+
+' =======================================================
+' Microservicio Usuarios y Autenticación
+' =======================================================
+package "MS Usuarios y Autenticación" #DDEEFF {
+
+  package "Presentación" {
+    class UsuarioControl
+    class AuthControl
+  }
+
+  package "Servicio" {
+    class UsuarioServicio
+    class AuthServicio
+    class TokenServicio
+  }
+
+  package "Modelo" {
+    class Usuario
+    class Rol
+    class Token
+    Usuario "1" o-right- "1" Rol
+  }
+
+  package "Persistencia" {
+    class UsuarioRepositorio
+  }
+
+  UsuarioControl  ..> UsuarioServicio : <<uses>>
+  AuthControl     ..> AuthServicio    : <<uses>>
+  UsuarioServicio ..> UsuarioRepositorio : <<uses>>
+  UsuarioServicio ..> Usuario         : <<uses>>
+  AuthServicio    ..> TokenServicio   : <<uses>>
+  AuthServicio    ..> UsuarioRepositorio : <<uses>>
+}
+
+' =======================================================
+' Microservicio Gestión de Artículos
+' =======================================================
+package "MS Gestión de Artículos" #FFEEDD {
+
+  package "Presentación" {
+    class ArticuloControl
+  }
+
+  package "Servicio" {
+    class ArticuloServicio
+    class ArchivoServicio
+  }
+
+  package "Modelo" {
+    class Articulo
+    class Archivo
+    Articulo "1" o-right- "*" Archivo
+  }
+
+  package "Persistencia" {
+    class ArticuloRepositorio
+    class ArchivoRepositorio
+  }
+
+  ArticuloControl ..> ArticuloServicio    : <<uses>>
+  ArticuloServicio ..> ArticuloRepositorio : <<uses>>
+  ArticuloServicio ..> ArchivoServicio    : <<uses>>
+  ArticuloServicio ..> Articulo           : <<uses>>
+  ArchivoServicio ..> ArchivoRepositorio  : <<uses>>
+}
+
+' =======================================================
+' Microservicio Proceso Editorial
+' =======================================================
+package "MS Proceso Editorial" #EEFFDD {
+
+  package "Presentación" {
+    class RevisionControl
+    class ComentarioControl
+  }
+
+  package "Servicio" {
+    class RevisionServicio
+    class ComentarioServicio
+    class NotificacionServicio
+  }
+
+  package "Modelo" {
+    class Revision
+    class Comentario
+    class EstadoRevision
+    Revision "1" o-right- "*" Comentario
+  }
+
+  package "Persistencia" {
+    class RevisionRepositorio
+    class ComentarioRepositorio
+  }
+
+  RevisionControl   ..> RevisionServicio   : <<uses>>
+  ComentarioControl ..> ComentarioServicio : <<uses>>
+  RevisionServicio  ..> RevisionRepositorio : <<uses>>
+  RevisionServicio  ..> NotificacionServicio : <<uses>>
+  RevisionServicio  ..> Revision           : <<uses>>
+  ComentarioServicio ..> ComentarioRepositorio : <<uses>>
+}
+
+' =======================================================
+' Microservicio Publicación
+' =======================================================
+package "MS Publicación" #FFDDEE {
+
+  package "Presentación" {
+    class PublicacionControl
+  }
+
+  package "Servicio" {
+    class PublicacionServicio
+  }
+
+  package "Modelo" {
+    class Publicacion
+    class Categoria
+    Publicacion "*" o-right- "1" Categoria
+  }
+
+  package "Persistencia" {
+    class PublicacionRepositorio
+  }
+
+  PublicacionControl  ..> PublicacionServicio    : <<uses>>
+  PublicacionServicio ..> PublicacionRepositorio : <<uses>>
+  PublicacionServicio ..> Publicacion            : <<uses>>
+}
+
+' =======================================================
+' Microservicio Administración
+' =======================================================
+package "MS Administración" #DDDEFF {
+
+  package "Presentación" {
+    class AdminControl
+    class ReporteControl
+  }
+
+  package "Servicio" {
+    class AdminServicio
+    class ReporteServicio
+    class CategoriaServicio
+  }
+
+  package "Modelo" {
+    class Configuracion
+    class Reporte
+    class CategoriaConfig
+  }
+
+  package "Persistencia" {
+    class AdminRepositorio
+    class ReporteRepositorio
+  }
+
+  AdminControl   ..> AdminServicio   : <<uses>>
+  ReporteControl ..> ReporteServicio : <<uses>>
+  AdminServicio  ..> AdminRepositorio : <<uses>>
+  AdminServicio  ..> CategoriaServicio : <<uses>>
+  ReporteServicio ..> ReporteRepositorio : <<uses>>
+  AdminServicio  ..> Configuracion   : <<uses>>
+}
+
+' =======================================================
+' Relaciones entre microservicios
+' =======================================================
+"MS Gestión de Artículos"  --> "MS Usuarios y Autenticación" : <<HTTP / REST - valida token>>
+"MS Proceso Editorial"     --> "MS Gestión de Artículos"     : <<HTTP / REST - consulta artículo>>
+"MS Publicación"           --> "MS Proceso Editorial"        : <<HTTP / REST - verifica aprobación>>
+"MS Administración"        --> "MS Usuarios y Autenticación" : <<HTTP / REST - gestiona usuarios>>
+
+@enduml
