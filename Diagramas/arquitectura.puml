@@ -1,30 +1,63 @@
-@startuml arquitectura
+@startuml arquitectura_microservicios
+title Arquitectura de Microservicios - Sistema de Artículos Académicos
 
-package "Presentacion" #DDDDDD {
- class VehiculoControl 
- class RegistroControl
+' ===== CLIENTES =====
+package "Clientes" #dddddd {
+  [Web App]
 }
 
-package Servicio {
-  class VehiculoServicio
-  class RegistroServicio
+' ===== API GATEWAY =====
+node "API Gateway" {
+  [Gateway]
 }
 
-
-package Modelo {
-  Vehiculo <|-- Moto
-  Vehiculo <|-- Auto
-  Registro "1" o-right-"1" Vehiculo
+' ===== MICROSERVICIOS =====
+node " Usuarios" {
+  [Servicio Usuarios]
+  database "DB Usuarios"
 }
 
-package Persistencia {
- class VehiculoRepositorio
- class RegistroRepositorio
-  
+node " Artículos" {
+  [Servicio Artículos]
+  database "DB Artículos"
 }
 
-Presentacion  ..>  Servicio : <<uses>>
-Servicio  .down.>  Persistencia : <<uses>>
-Servicio  .right.>  Modelo : <<uses>>
+node " Editorial" {
+  [Servicio Editorial]
+  database "DB Editorial"
+}
+
+node " Publicación" {
+  [Servicio Publicación]
+  database "DB Publicación"
+}
+
+node " Administración" {
+  [Servicio Administración]
+  database "DB Admin"
+}
+
+' ===== COMUNICACIÓN CLIENTES =====
+[Web App] --> [Gateway] : HTTPS/REST
+
+' ===== ENRUTAMIENTO =====
+[Gateway] --> [Servicio Usuarios]
+[Gateway] --> [Servicio Artículos]
+[Gateway] --> [Servicio Editorial]
+[Gateway] --> [Servicio Publicación]
+[Gateway] --> [Servicio Administración]
+
+' ===== BASES DE DATOS =====
+[Servicio Usuarios] --> "DB Usuarios"
+[Servicio Artículos] --> "DB Artículos"
+[Servicio Editorial] --> "DB Editorial"
+[Servicio Publicación] --> "DB Publicación"
+[Servicio Administración] --> "DB Admin"
+
+' ===== COMUNICACIÓN ENTRE SERVICIOS =====
+[Servicio Artículos] --> [Servicio Usuarios] : validar usuario
+[Servicio Editorial] --> [Servicio Artículos] : obtener artículos
+[Servicio Publicación] --> [Servicio Editorial] : validar aprobación
+[Servicio Administración] --> [Servicio Usuarios] : gestión usuarios
 
 @enduml
